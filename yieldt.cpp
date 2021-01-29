@@ -37,7 +37,7 @@ int yieldt_create(schedule_t &schedule,Fun func,void *arg)
     t->func = func;
     t->arg = arg;
 
-    getcontext(&(t->ctx));
+    getcontext(&(t->ctx));          //初始化ctx结构体，将当前的上下文保存到ctx中
 
     t->ctx.uc_stack.ss_sp = t->stack;
     t->ctx.uc_stack.ss_size = DEFAULT_STACK_SIZE;
@@ -46,8 +46,16 @@ int yieldt_create(schedule_t &schedule,Fun func,void *arg)
 
     schedule.running_thread = id;
 
+    /*
+    makecontext修改通过getcontext取得的上下文ucp(这意味着调用makecontext前必须先调用getcontext)。
+     然后给该上下文指定一个栈空间ucp->stack，设置后继的上下文ucp->uc_link.
+
+    当上下文通过setcontext或者swapcontext激活后，执行func函数，argc为func的参数个数，后面是func的参数序列。
+    当func执行返回后，继承的上下文被激活，如果继承上下文为NULL时，线程退出。
+        
+    */
     makecontext(&(t->ctx),(void(*)(void))(yieldt_body),1,&schedule);
-    swapcontext(&(schedule.main),&(t->ctx));
+    swapcontext(&(schedule.main),&(t->ctx));   //保存当前上下文到oucp结构体中，然后激活upc上下文。 
 
     return id;
 }

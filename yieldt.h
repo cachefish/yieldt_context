@@ -9,6 +9,18 @@
 
 enum ThreadState{FREE,RUNNABLE,RUNNING,SUSPEND};
 
+/*
+typedef struct ucontext {  
+    struct ucontext *uc_link;  //当当前上下文(如使用makecontext创建的上下文）运行终止时系统会恢复uc_link指向的上下文
+    sigset_t         uc_sigmask;  uc_sigmask为该上下文中的阻塞信号集合
+    stack_t          uc_stack;  uc_stack为该上下文中使用的栈
+    mcontext_t       uc_mcontext;  uc_mcontext保存的上下文的特定机器表示，包括调用线程的特定寄存器等
+    ...  
+} ucontext_t; 
+*/
+
+
+
 struct schedule_t;
 
 typedef void (*Fun)(void *arg);
@@ -18,8 +30,8 @@ typedef struct yieldt_t
     ucontext_t ctx;
     Fun func;
     void *arg;
-    enum ThreadState state;
-    char stack[DEFAULT_STACK_SIZE];
+    enum ThreadState state;     //该线程状态
+    char stack[DEFAULT_STACK_SIZE]; 
 }yeildt_t;
 
 typedef struct schedule_t
